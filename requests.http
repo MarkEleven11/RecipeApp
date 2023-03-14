@@ -1,0 +1,25 @@
+GET http://localhost:8080/
+###
+GET  http://localhost:8080/info
+###
+GET http://localhost:8080/recipe/1
+###
+POST http://localhost:8080/recipe
+Content-Type: application/json
+
+{
+  "title": "Test2",
+  "cockingTime": 20,
+  "ingredients": [
+    {
+      "title": "Milk",
+      "number": 2,
+      "measure": "gallons"
+    }
+  ],
+  "steps": [
+    "step 1",
+    "step 2",
+    "step 3"
+  ]
+}
