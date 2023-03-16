@@ -5,6 +5,8 @@ import com.example.recipeapp.models.Recipes;
 import com.example.recipeapp.services.RecipeService;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/recipe")
 public class RecipeController {
@@ -24,5 +26,20 @@ public class RecipeController {
     public RecipeDTO addRecipe(@RequestBody Recipes recipes){
         return recipeService.addRecipe(recipes);
     }
+
+    @PostMapping("{id}")
+    public RecipeDTO editRecipe(@PathVariable ("id") int id, @RequestBody Recipes recipes) {
+        return recipeService.editRecipe(id, recipes);
+    }
+
+    @DeleteMapping("{id}")
+    public RecipeDTO deleteRecipes(@PathVariable ("id") int id, @RequestBody Recipes recipes) {
+        return  recipeService.deleteRecipe(id, recipes);
+    }
+    @GetMapping
+    public List<RecipeDTO> getAllRecipes() {
+        return  recipeService.getAllRecipes();
+    }
 }
+
 

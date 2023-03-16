@@ -5,6 +5,8 @@ import com.example.recipeapp.models.Ingredients;
 import com.example.recipeapp.services.IngredientsService;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/ingredients")
 public class IngredientsController {
@@ -26,4 +28,18 @@ public class IngredientsController {
         return  ingredientsService.getIngredient(id);
     }
 
+    @PostMapping("{id}")
+    public  IngredientsDTO editIngredient(@PathVariable ("id") int id, @RequestBody Ingredients ingredients) {
+        return ingredientsService.editIngredients(id, ingredients);
+    }
+
+    @DeleteMapping("{id}")
+    public IngredientsDTO deleteIngredient (@PathVariable ("id") int id, @RequestBody Ingredients ingredients) {
+        return ingredientsService.deleteIngredients(id, ingredients);
+    }
+
+    @GetMapping
+    public List<IngredientsDTO> getAllIngredients() {
+        return  ingredientsService.getAllIngredients();
+    }
 }

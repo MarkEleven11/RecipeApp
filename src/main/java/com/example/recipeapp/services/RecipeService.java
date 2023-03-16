@@ -1,10 +1,13 @@
 package com.example.recipeapp.services;
 
 import com.example.recipeapp.dto.RecipeDTO;
+import com.example.recipeapp.exeptions.RecipeNotFoundExeption;
 import com.example.recipeapp.models.Recipes;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @Service
@@ -27,4 +30,30 @@ public class RecipeService {
         }
         return null;
     }
+    public RecipeDTO editRecipe(int id, Recipes recipe) {
+        Recipes existRecipe = recipes.get(id);
+        if (existRecipe == null) {
+            throw new RecipeNotFoundExeption();
+        }
+        recipes.put(id, recipe);
+        return RecipeDTO.from(id, recipe);
+    }
+
+    public RecipeDTO deleteRecipe(int id, Recipes recipe) {
+        Recipes recipeFind = recipes.remove(id);
+        if (recipeFind == null) {
+            throw new RuntimeException();
+        }
+        return RecipeDTO.from(id, recipe);
+    }
+
+
+    public List<RecipeDTO> getAllRecipes() {
+        List<RecipeDTO> result = new ArrayList<>();
+        for (Map.Entry<Integer, Recipes> entry : recipes.entrySet()) {
+            result.add(RecipeDTO.from(entry.getKey(), entry.getValue()));
+        }
+        return result;
+    }
+
 }
