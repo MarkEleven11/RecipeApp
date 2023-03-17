@@ -2,7 +2,9 @@ package com.example.recipeapp.services;
 
 import com.example.recipeapp.dto.IngredientsDTO;
 import com.example.recipeapp.exeptions.IngredientNotFoundExeption;
+import com.example.recipeapp.exeptions.InvalidIngredientFormatExeption;
 import com.example.recipeapp.models.Ingredients;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -17,7 +19,12 @@ public class IngredientsService {
 
     Map<Integer, Ingredients> ingredients = new HashMap<>();
 
+
+    // Использование библиотеки Apache
     public IngredientsDTO addIngredient (Ingredients ingredient) {
+        if (StringUtils.isBlank(ingredient.getTitle())) {
+            throw new InvalidIngredientFormatExeption();
+        }
         int id = idCounter++;
         ingredients.put(id, ingredient);
         return IngredientsDTO.from(id, ingredient);

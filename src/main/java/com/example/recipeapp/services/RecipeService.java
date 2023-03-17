@@ -1,8 +1,10 @@
 package com.example.recipeapp.services;
 
 import com.example.recipeapp.dto.RecipeDTO;
+import com.example.recipeapp.exeptions.InvalidRecipeFormatExeption;
 import com.example.recipeapp.exeptions.RecipeNotFoundExeption;
 import com.example.recipeapp.models.Recipes;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -17,7 +19,12 @@ public class RecipeService {
 
     private final Map<Integer, Recipes> recipes = new HashMap<>();
 
+
+    // Использование библиотеки Apache.
     public RecipeDTO addRecipe(Recipes recipe) {
+        if(StringUtils.isBlank(recipe.getTitle())) {
+            throw new InvalidRecipeFormatExeption();
+        }
         int id = idCounter++;
         recipes.put(id, recipe);
         return RecipeDTO.from(id, recipe);
