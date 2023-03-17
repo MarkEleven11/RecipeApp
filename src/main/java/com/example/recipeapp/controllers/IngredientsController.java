@@ -23,7 +23,7 @@ public class IngredientsController {
 
     @PostMapping
     @Operation(summary = "Добавление ингредиента в список.",
-            description = "Поволяет добавить новый ингредиентю")
+            description = "Поволяет добавить новый ингредиент.")
     public IngredientsDTO addIngredient(@RequestBody Ingredients ingredients) {
         return ingredientsService.addIngredient(ingredients);
     }
