@@ -4,20 +4,26 @@ import com.example.recipeapp.dto.RecipeDTO;
 import com.example.recipeapp.exeptions.InvalidRecipeFormatExeption;
 import com.example.recipeapp.exeptions.RecipeNotFoundExeption;
 import com.example.recipeapp.models.Recipes;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Service
 public class RecipeService {
 
     private int idCounter = 0;
 
-    private final Map<Integer, Recipes> recipes = new HashMap<>();
+    private Map<Integer, Recipes> recipes = new HashMap<>();
+
+    private final FileService fileService;
+
+    public RecipeService(FileService fileService) {
+        this.fileService = fileService;
+    }
 
 
     // Использование библиотеки Apache.
@@ -27,6 +33,7 @@ public class RecipeService {
         }
         int id = idCounter++;
         recipes.put(id, recipe);
+        saveToFile();
         return RecipeDTO.from(id, recipe);
     }
 
@@ -43,6 +50,7 @@ public class RecipeService {
             throw new RecipeNotFoundExeption();
         }
         recipes.put(id, recipe);
+        saveToFile();
         return RecipeDTO.from(id, recipe);
     }
 
@@ -61,6 +69,25 @@ public class RecipeService {
             result.add(RecipeDTO.from(entry.getKey(), entry.getValue()));
         }
         return result;
+    }
+
+    private void saveToFile() {
+        try {
+           String json =  new ObjectMapper().writeValueAsString(recipes);
+           fileService.saveToFile(json);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private void readFromFile() {
+        String json = fileService.readFromFile();
+        try {
+            recipes = new ObjectMapper().readValue(json, new TypeReference<Map<Integer, Recipes>>() {
+            });
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
     }
 
 }
