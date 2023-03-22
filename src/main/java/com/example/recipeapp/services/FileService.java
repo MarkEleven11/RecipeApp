@@ -10,7 +10,7 @@ import java.nio.file.Path;
 @Service
 public class FileService {
 
-    @Value("${path.to data.file}")
+    @Value("${path.to.data.file}")
     private String dataFilePath;
 
     @Value("${name.of.data.file}")

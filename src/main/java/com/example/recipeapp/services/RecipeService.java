@@ -10,7 +10,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
-import java.util.*;
+import javax.annotation.PostConstruct;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 @Service
 public class RecipeService {
@@ -28,7 +32,7 @@ public class RecipeService {
 
     // Использование библиотеки Apache.
     public RecipeDTO addRecipe(Recipes recipe) {
-        if(StringUtils.isBlank(recipe.getTitle())) {
+        if (StringUtils.isBlank(recipe.getTitle())) {
             throw new InvalidRecipeFormatExeption();
         }
         int id = idCounter++;
@@ -37,13 +41,14 @@ public class RecipeService {
         return RecipeDTO.from(id, recipe);
     }
 
-    public RecipeDTO getRecipe (int id) {
+    public RecipeDTO getRecipe(int id) {
         Recipes recipe = recipes.get(id);
         if (recipe != null) {
             return RecipeDTO.from(id, recipe);
         }
         return null;
     }
+
     public RecipeDTO editRecipe(int id, Recipes recipe) {
         Recipes existRecipe = recipes.get(id);
         if (existRecipe == null) {
@@ -73,8 +78,8 @@ public class RecipeService {
 
     private void saveToFile() {
         try {
-           String json =  new ObjectMapper().writeValueAsString(recipes);
-           fileService.saveToFile(json);
+            String json = new ObjectMapper().writeValueAsString(recipes);
+            fileService.saveToFile(json);
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
         }
@@ -89,5 +94,10 @@ public class RecipeService {
             throw new RuntimeException(e);
         }
     }
+
+   @PostConstruct
+    private void goRead() {
+        readFromFile();
+   }
 
 }
