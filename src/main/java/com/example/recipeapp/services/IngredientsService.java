@@ -1,25 +1,17 @@
 package com.example.recipeapp.services;
-
 import com.example.recipeapp.dto.IngredientsDTO;
 import com.example.recipeapp.exeptions.IngredientNotFoundExeption;
 import com.example.recipeapp.exeptions.InvalidIngredientFormatExeption;
 import com.example.recipeapp.models.Ingredients;
-import com.example.recipeapp.models.Recipes;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
-
-import javax.annotation.PostConstruct;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Service
 public class IngredientsService {
 
+    private static final String FILE_STORE_NAME = "ingredients";
     private int idCounter = 0;
 
     Map<Integer, Ingredients> ingredients = new HashMap<>();
@@ -28,6 +20,9 @@ public class IngredientsService {
 
     public IngredientsService(FileService fileService) {
         this.fileService = fileService;
+        Map <Integer, Ingredients> storedMap = fileService.readFromFile(FILE_STORE_NAME, new TypeReference<>() {
+        });
+        this.ingredients = Objects.requireNonNullElseGet(storedMap, HashMap::new);
     }
 
 
@@ -38,7 +33,7 @@ public class IngredientsService {
         }
         int id = idCounter++;
         ingredients.put(id, ingredient);
-        saveToFile();
+        this.fileService.saveToFile(FILE_STORE_NAME, this.ingredients);
         return IngredientsDTO.from(id, ingredient);
     }
 
@@ -55,7 +50,7 @@ public class IngredientsService {
             throw new IngredientNotFoundExeption();
         }
         ingredients.put(id, ingredient);
-        saveToFile();
+        this.fileService.saveToFile(FILE_STORE_NAME, this.ingredients);
         return IngredientsDTO.from(id, ingredient);
     }
 
@@ -65,6 +60,7 @@ public class IngredientsService {
             throw new IngredientNotFoundExeption();
         }
         ingredients.remove(id);
+        this.fileService.saveToFile(FILE_STORE_NAME, this.ingredients);
         return IngredientsDTO.from(id, ingredient);
     }
 
@@ -75,29 +71,4 @@ public class IngredientsService {
         }
         return result;
     }
-
-    private void saveToFile() {
-        try {
-            String json = new ObjectMapper().writeValueAsString(ingredients);
-            fileService.saveToFile(json);
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    private void readFromFile() {
-        String json = fileService.readFromFile();
-        try {
-            ingredients = new ObjectMapper().readValue(json, new TypeReference<Map<Integer, Ingredients>>() {
-            });
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    @PostConstruct
-    private void goRead() {
-        readFromFile();
-    }
-
 }

@@ -48,6 +48,13 @@ public class RecipeController {
         return recipeService.deleteRecipe(id, recipes);
     }
 
+    @GetMapping("byIngredient/{id}")
+    @Operation(summary = "Получение рецепта по ID ингредиента.",
+    description = "Выводит рецепты по ID ингредиенту.")
+    public List<RecipeDTO> getByIngredientId(@PathVariable ("id") int id) {
+        return recipeService.getRecipesByIngredientId(id);
+    }
+
     @GetMapping
     @Operation(summary = "Получение всех рецептов.",
             description = "Выводит все рецепты.")

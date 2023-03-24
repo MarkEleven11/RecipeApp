@@ -1,51 +1,53 @@
 package com.example.recipeapp.services;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
+
 import java.nio.file.Files;
 import java.nio.file.Path;
 
 @Service
 public class FileService {
 
-    @Value("${path.to.data.file}")
-    private String dataFilePath;
-
-    @Value("${name.of.data.file}")
-    private String dataFileName;
+    private final Path filesDir;
+    private final ObjectMapper objectMapper;
 
 
-    public boolean saveToFile(String json) {
-        try {
-            clearDataFile();
-            Files.writeString(Path.of(dataFilePath, dataFileName), json);
-            return true;
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+    public FileService(ObjectMapper objectMapper, @Value("${app.file.dir}") Path filesDir) {
+        this.objectMapper = objectMapper;
+        this.filesDir = filesDir;
     }
 
-    public String readFromFile(){
+    public <T> void saveToFile(String fileName, T objectToSave) {
         try {
-            return Files.readString(Path.of(dataFilePath, dataFileName));
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-
-    }
-
-    private boolean clearDataFile() {
-        try {
-            Path path = Path.of(dataFilePath, dataFileName);
-            Files.deleteIfExists(path);
-            Files.createFile(path);
-            return true;
+            String json = objectMapper.writeValueAsString(objectToSave);
+            Files.createDirectories(filesDir);
+            Path filePath = filesDir.resolve(fileName + ".json");
+            Files.deleteIfExists(filePath);
+            Files.createFile(filePath);
+            Files.writeString(filePath, json);
         } catch (IOException e) {
             e.printStackTrace();
-            return false;
         }
+
     }
 
+    public <T> T readFromFile(String fileName, TypeReference<T> typeReference) {
+        Path filePath = filesDir.resolve(fileName + ".json");
+        if (!Files.exists(filePath)) {
+            return null;
+        }
+        try {
+            String jsonString = Files.readString(filePath);
+            T obj = objectMapper.readValue(jsonString, typeReference);
+            return obj;
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
 }
