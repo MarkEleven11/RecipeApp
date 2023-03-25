@@ -8,6 +8,7 @@ import com.example.recipeapp.models.Ingredients;
 import com.example.recipeapp.models.Recipes;
 import com.fasterxml.jackson.core.type.TypeReference;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -91,5 +92,15 @@ public class RecipeService {
             result.add(RecipeDTO.from(entry.getKey(), entry.getValue()));
         }
         return result;
+    }
+
+    public Resource getRecipesFile () {
+        return fileService.getResorce(STORE_FILE_NAME);
+    }
+
+    public void importRecipes (Resource resource) {
+        fileService.saveResource(STORE_FILE_NAME, resource);
+        this.recipes = fileService.readFromFile(STORE_FILE_NAME, new TypeReference<>() {
+        });
     }
 }

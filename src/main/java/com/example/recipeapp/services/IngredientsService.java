@@ -5,6 +5,7 @@ import com.example.recipeapp.exeptions.InvalidIngredientFormatExeption;
 import com.example.recipeapp.models.Ingredients;
 import com.fasterxml.jackson.core.type.TypeReference;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
 import java.util.*;
 
@@ -70,5 +71,15 @@ public class IngredientsService {
             result.add(IngredientsDTO.from(entry.getKey(), entry.getValue()));
         }
         return result;
+    }
+
+    public Resource getIngredientsFile () {
+        return fileService.getResorce(FILE_STORE_NAME);
+    }
+
+    public void importRecipes (Resource resource) {
+        fileService.saveResource(FILE_STORE_NAME, resource);
+        this.ingredients = fileService.readFromFile(FILE_STORE_NAME, new TypeReference<>() {
+        });
     }
 }
