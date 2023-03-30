@@ -1,5 +1,4 @@
 package com.example.recipeapp.controllers;
-
 import com.example.recipeapp.services.IngredientsService;
 import com.example.recipeapp.services.RecipeService;
 import org.springframework.core.io.Resource;
