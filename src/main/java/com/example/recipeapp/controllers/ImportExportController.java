@@ -12,6 +12,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
+
 @RestController
 public class ImportExportController {
 
@@ -24,14 +26,18 @@ public class ImportExportController {
     }
 
     @GetMapping("/files/exports/recipes")
-    public ResponseEntity<Resource> downloadRecipes() {
+    public ResponseEntity<Resource> downloadRecipes() throws IOException {
         Resource recipes = recipeService.getRecipesFile();
         ContentDisposition disposition = ContentDisposition.attachment()
                 .name("recipe.json")
                 .build();
         HttpHeaders httpHeaders = new HttpHeaders();
         httpHeaders.setContentDisposition(disposition);
-        return ResponseEntity.ok().headers(httpHeaders).body(recipes);
+        return ResponseEntity.ok()
+                .contentType(MediaType.TEXT_PLAIN)
+                .contentLength(recipes.contentLength())
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"recipes.json\"")
+                .body(recipes);
     }
 
     @GetMapping("files/exports/ingredients")
@@ -42,7 +48,15 @@ public class ImportExportController {
                 .build();
         HttpHeaders httpHeaders = new HttpHeaders();
         httpHeaders.setContentDisposition(disposition);
-        return ResponseEntity.ok().headers(httpHeaders).body(ingredients);
+        try {
+            return ResponseEntity.ok()
+                    .contentType(MediaType.TEXT_PLAIN)
+                    .contentLength(ingredients.contentLength())
+                    .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"recipes.json\"")
+                    .body(ingredients);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
 
     }
 
