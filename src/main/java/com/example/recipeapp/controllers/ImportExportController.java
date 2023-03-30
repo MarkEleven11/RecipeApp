@@ -41,22 +41,19 @@ public class ImportExportController {
     }
 
     @GetMapping("files/exports/ingredients")
-    public  ResponseEntity<Resource> downloadIngredients() {
+    public  ResponseEntity<Resource> downloadIngredients() throws IOException {
         Resource ingredients = ingredientsService.getIngredientsFile();
         ContentDisposition disposition = ContentDisposition.attachment()
                 .name("ingredients.json")
                 .build();
         HttpHeaders httpHeaders = new HttpHeaders();
         httpHeaders.setContentDisposition(disposition);
-        try {
             return ResponseEntity.ok()
                     .contentType(MediaType.TEXT_PLAIN)
                     .contentLength(ingredients.contentLength())
-                    .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"recipes.json\"")
+                    .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"ingredients.json\"")
                     .body(ingredients);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+
 
     }
 
