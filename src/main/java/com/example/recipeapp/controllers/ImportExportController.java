@@ -26,35 +26,43 @@ public class ImportExportController {
     }
 
     @GetMapping("/files/exports/recipes")
-    public ResponseEntity<Resource> downloadRecipes() throws IOException {
+    public ResponseEntity<Resource> downloadRecipes()  {
         Resource recipes = recipeService.getRecipesFile();
         ContentDisposition disposition = ContentDisposition.attachment()
                 .name("recipe.json")
                 .build();
         HttpHeaders httpHeaders = new HttpHeaders();
         httpHeaders.setContentDisposition(disposition);
-        return ResponseEntity.ok()
-                .contentType(MediaType.TEXT_PLAIN)
-                .contentLength(recipes.contentLength())
-                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"recipes.json\"")
-                .body(recipes);
+        try {
+            return ResponseEntity.ok()
+                    .contentType(MediaType.TEXT_PLAIN)
+                    .contentLength(recipes.contentLength())
+                    .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"recipes.json\"")
+                    .body(recipes);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return ResponseEntity.noContent().build();
     }
 
     @GetMapping("files/exports/ingredients")
-    public  ResponseEntity<Resource> downloadIngredients() throws IOException {
+    public  ResponseEntity<Resource> downloadIngredients()  {
         Resource ingredients = ingredientsService.getIngredientsFile();
         ContentDisposition disposition = ContentDisposition.attachment()
                 .name("ingredients.json")
                 .build();
         HttpHeaders httpHeaders = new HttpHeaders();
         httpHeaders.setContentDisposition(disposition);
+        try {
             return ResponseEntity.ok()
                     .contentType(MediaType.TEXT_PLAIN)
                     .contentLength(ingredients.contentLength())
                     .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"ingredients.json\"")
                     .body(ingredients);
-
-
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return ResponseEntity.noContent().build();
     }
 
     @PostMapping(value = "/files/import/recipes", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
