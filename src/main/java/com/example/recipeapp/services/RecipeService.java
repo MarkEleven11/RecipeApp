@@ -10,6 +10,8 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
+
+import java.io.PrintWriter;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -25,13 +27,12 @@ public class RecipeService {
     private final FileService fileService;
 
 
-
     public RecipeService(IngredientsService ingredientsService, FileService fileService) {
         this.ingredientsService = ingredientsService;
         this.fileService = fileService;
-        Map <Integer, Recipes> storedMap = fileService.readFromFile(STORE_FILE_NAME, new TypeReference<>() {
+        Map<Integer, Recipes> storedMap = fileService.readFromFile(STORE_FILE_NAME, new TypeReference<>() {
         });
-       this.recipes = Objects.requireNonNullElseGet(storedMap, HashMap::new);
+        this.recipes = Objects.requireNonNullElseGet(storedMap, HashMap::new);
     }
 
 
@@ -42,18 +43,18 @@ public class RecipeService {
         }
         int id = idCounter++;
         recipes.put(id, recipe);
-        for (Ingredients ingredient : recipe.getIngredients()){
+        for (Ingredients ingredient : recipe.getIngredients()) {
             this.ingredientsService.addIngredient(ingredient);
         }
         this.fileService.saveToFile(STORE_FILE_NAME, this.recipes);
         return RecipeDTO.from(id, recipe);
     }
 
-    public List <RecipeDTO> getRecipesByIngredientId (int ingredientId) {
+    public List<RecipeDTO> getRecipesByIngredientId(int ingredientId) {
         IngredientsDTO ingredie = this.ingredientsService.getIngredient(ingredientId);
         return this.recipes.entrySet()
                 .stream()
-                .filter(e -> e.getValue().getIngredients().stream().anyMatch( i -> i.getTitle().equals(ingredie)))
+                .filter(e -> e.getValue().getIngredients().stream().anyMatch(i -> i.getTitle().equals(ingredie)))
                 .map(e -> RecipeDTO.from(e.getKey(), e.getValue()))
                 .collect(Collectors.toList());
     }
@@ -94,13 +95,31 @@ public class RecipeService {
         return result;
     }
 
-    public Resource getRecipesFile () {
+    public Resource getRecipesFile() {
         return fileService.getResorce(STORE_FILE_NAME);
     }
 
-    public void importRecipes (Resource resource) {
+    public void importRecipes(Resource resource) {
         fileService.saveResource(STORE_FILE_NAME, resource);
         this.recipes = fileService.readFromFile(STORE_FILE_NAME, new TypeReference<>() {
         });
     }
+
+    public void exportFileFromMemories(PrintWriter writer) {
+        for (Recipes recipes : this.recipes.values()) {
+            writer.println(recipes.getTitle());
+            writer.println("Время приготовления: %d минут".formatted(recipes.getTimeCoocking()));
+            writer.println("Ингредиенты:");
+            for (Ingredients ingredients : recipes.getIngredients()) {
+                writer.println("\t%s - %d %s".formatted(ingredients.getTitle(), ingredients.getNumber(), ingredients.getMeasure()));
+            }
+            writer.println("Инструкция приготовления");
+            for (int i = 0; i < recipes.getSteps().size(); i++) {
+                writer.println("%d. %s".formatted(i+1, recipes.getSteps().get(i)));
+            }
+            writer.println(" ");
+        }
+        writer.flush();
+    }
+
 }
